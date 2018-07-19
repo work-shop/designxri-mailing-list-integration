@@ -32,7 +32,7 @@ MailchimpIntegration.prototype.getMatchingSubscribers = function( records, next 
 
     var calls = records.map( function( record ) {
 
-        var prev = record.get('Managed Field: Previous Email Address');
+        var prev = record.get('Managed Field: Previous Email Address') || record.get('Email');
 
         return {
             method: 'get',
@@ -41,12 +41,14 @@ MailchimpIntegration.prototype.getMatchingSubscribers = function( records, next 
                 query: prev,
                 list_id: self.list
             },
+            verbose: false
         }
     });
 
     // TODO: Change this back to 'batch' and calls, when ready for production.
     self.mailchimp.batch( calls, function( err, batchResults ) {
         if ( err ) {
+
             /** NOTE: If we passed an empty query, that means there was no previous email in the list, so return an empty result */
             if ( err.status === 400 && err.detail.indexOf( 'query' ) !== -1 ) {
 
@@ -61,7 +63,7 @@ MailchimpIntegration.prototype.getMatchingSubscribers = function( records, next 
         next( null, batchResults.map( function( result, i ) { return { record: records[i], result: result }; }) );
 
 
-    });
+    }, { wait: true, interval: 1000, unpack: true, verbose: false });
 
 };
 
@@ -95,7 +97,7 @@ MailchimpIntegration.prototype.updateSubscriberSet = function( records, next = f
 
             })
         }
-    }
+   }
 
     /*
      * NOTE: use PUT, rather than PATCH, as PUT will add a new email address, if it doesn't
@@ -124,7 +126,7 @@ MailchimpIntegration.prototype.updateSubscriberSet = function( records, next = f
         if ( err ) { next( err ); }
         else { next( null, records ); }
 
-    });
+    }, { wait: true, interval: 1000, unpack: true, verbose: false });
 
 }
 

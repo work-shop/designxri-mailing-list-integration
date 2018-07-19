@@ -38,7 +38,7 @@ IntegrationPipeline.prototype.selectAction = function( list, next = function() {
         pair.subscribed = integration.airtable.isActiveInList( pair );
         pair.exists = integration.mailchimp.hasPreviousRecord( pair );
 
-        integration.log.integration('Record is subscribed = ' + convertToLoggedBoolean( pair.subscribed ) + '; Record exists in mailchimp = ' + convertToLoggedBoolean( pair.exists ), 3 );
+        integration.log.integration('subscribed = ' + convertToLoggedBoolean( pair.subscribed ) + '; In Mailing List = ' + convertToLoggedBoolean( pair.exists ), 3 );
 
         callback( null, pair );
 
@@ -74,9 +74,11 @@ IntegrationPipeline.prototype.pairRecords = function( next = function() {} ) {
 
         integration.log.airtable('Retreived a set of ' + set.length + ' record(s).', 1 );
 
+        integration.log.mailchimp('Preparing ' + set.length + ' batch(es).', 1 );
+
         integration.mailchimp.getMatchingSubscribers( set, function( err, list ) {
 
-            integration.log.mailchimp('Searched for ' + set.length + ' record(s) by email address.', 1 );
+            integration.log.mailchimp('Searched for ' + list.length + ' record(s) by email address.', 1 );
 
             next( err, list );
 

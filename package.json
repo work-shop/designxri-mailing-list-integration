@@ -35,5 +35,14 @@
     "node-schedule": "^1.3.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2"
+  },
+  "view": "Managed View: Mailing List",
+  "fields": {
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "previous_email": "Managed Field: Previous Email Address",
+      "in_mailing_list": "Active in Mailing Lists",
+      "email": "Email",
+      "previous_in_mailing_list": "Managed Field: Previous Active In Mailing Lists"
   }
 }
