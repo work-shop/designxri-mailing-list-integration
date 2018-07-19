@@ -1,9 +1,17 @@
 'use strict';
 
-var util = require('util');
+
 var Mailchimp = require('mailchimp-api-v3');
 var md5 = require('md5');
 
+/**
+ * This class is responsible for managing the mailchimp integration side of
+ * this pipeline.
+ *
+ * @param endpoint string the mailchimp API endpoint to connect to.
+ * @param listID string the ID of the list to manage in mailchimp.
+ * @param key the API key to use when connecting to mailchimp.
+ */
 function MailchimpIntegration( endpoint, listID, key ) {
     if ( !(this instanceof MailchimpIntegration) ) { return new MailchimpIntegration( endpoint, listID, key ); }
     var self = this;
@@ -18,6 +26,9 @@ function MailchimpIntegration( endpoint, listID, key ) {
 /**
  * Given a pair, returns true if the Airtable record associated with the pair
  * returned any exact matches in the mailchimp list in question.
+ *
+ * @param pair (AirtableRecord, MailchimpSearchResult) the pair to test.
+ * @return boolean true if the AirtableRecord has an exactly corresponding entry in this mailchimp list.
  */
 MailchimpIntegration.prototype.hasPreviousRecord = function( pair ) { return pair.result.exact_matches.total_items !== 0; }
 
@@ -25,6 +36,10 @@ MailchimpIntegration.prototype.hasPreviousRecord = function( pair ) { return pai
  * This routine takes a set of records from airtable, and runs
  * a batched request against the mailchimp API to get these
  * any results that match this subscriber.
+ *
+ * @param records Array<AirtableRecord> a set of airtable records to check Mailchimp for.
+ * @param next a continuation to pass control to.
+ *             follows node style (err, next) => Ø pattern.
  */
 MailchimpIntegration.prototype.getMatchingSubscribers = function( records, next = function() {} ) {
 
@@ -45,7 +60,6 @@ MailchimpIntegration.prototype.getMatchingSubscribers = function( records, next 
         }
     });
 
-    // TODO: Change this back to 'batch' and calls, when ready for production.
     self.mailchimp.batch( calls, function( err, batchResults ) {
         if ( err ) {
 
@@ -68,8 +82,18 @@ MailchimpIntegration.prototype.getMatchingSubscribers = function( records, next 
 };
 
 /**
- * This routine creates a new subscriber record in Mailchimp
- * For a given airtable record.
+ * This routine creates or updates a subscriber record in Mailchimp
+ * For a given airtable record. it does this by adding all records that
+ * weren't previously found in the list, and then individually patching
+ * any records that were in the list. This includes updating emails and
+ * subscription state.
+ *
+ * TODO: Extend this to update based on changes to First Name, Last Name, and other fields too.
+ *
+ * @param records Array<(AirtableRecord, MailchimpSearchResult)> the paired set of records to update.
+ * @param next a continuation to pass control to.
+ *             follows node style (err, next) => Ø pattern.
+ *
  */
 MailchimpIntegration.prototype.updateSubscriberSet = function( records, next = function(){} ) {
 

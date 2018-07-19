@@ -3,6 +3,13 @@
 var async = require('async');
 var Airtable = require('airtable');
 
+/**
+ * This class manages the Airtable side of this integration.
+ *
+ * @param endpoint the URL to make API queries against.
+ * @param baseID the hash of the base to use in airtable.
+ * @param key the API key for accessing the API.
+ */
 function AirtableIntegration( endpoint, baseId, key ) {
     if ( !(this instanceof AirtableIntegration) ) { return new AirtableIntegration( endpoint, baseId, key ); }
     var self = this;
@@ -16,14 +23,16 @@ function AirtableIntegration( endpoint, baseId, key ) {
 
 }
 
+
 /**
- *
- *
  * TODO: as soon as Airtable exposes a record modified time, we can really implement this.
  * For now, we need to assume the airtable state is the latest state, as this is where
  * list activity is getting managed.
  *
  * NOTE: We could also try to implement this direction as a Zapier date.
+ *
+ * @param pair Object( Airtable Record, Mailchimp Search Result ) A given pair to test for membership in the list.
+ *
  */
 AirtableIntegration.prototype.isActiveInList = function( pair ) {
 
@@ -36,6 +45,9 @@ AirtableIntegration.prototype.isActiveInList = function( pair ) {
  * If this managed field indicates that the record is not up to date, then the record is
  * understood to have changed, is included in the change set, and is returned for processing.
  * otherwise the record is ignored.
+ *
+ * @param next a continuation to pass control to.
+ *             follows node style (err, next) => Ø pattern.
  */
 AirtableIntegration.prototype.getChangeSet = function( next = function() {} ) {
 
@@ -68,6 +80,10 @@ AirtableIntegration.prototype.getChangeSet = function( next = function() {} ) {
  * This routine takes a given change set and updates the records in
  * Airtable to reflect the latest changes after a mailchimp batch.
  *
+ * @param records Array( {record, result} ), an array of pairs
+ *                of airtable records with mailchimp search results.
+ * @param next a continuation to pass control to.
+ *             follows node style (err, next) => Ø pattern.
  */
 AirtableIntegration.prototype.synchronizeRecords = function( records, next = function() {}) {
 

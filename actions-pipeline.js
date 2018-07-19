@@ -2,10 +2,23 @@
 
 var async = require('async');
 
-function convertToLoggedBoolean( value ) {
-    return ( value ) ? 'Yes'.green : 'No'.red;
-}
 
+/**
+ * A utility method for pretty printing a boolean value
+ *
+ * @param value bool the boolean to pretty print.
+ */
+function convertToLoggedBoolean( value ) { return ( value ) ? 'Yes'.green : 'No'.red; }
+
+/**
+ * this class is responsible for orchestrating processing
+ * between mailchimp and airtable, and logging progress as
+ * it occurs.
+ *
+ * @param airtable AirtableIntegration an airtable integration instance to use.
+ * @param mailchimp MailchimpIntegration a mailchimp integration instance to use.
+ * @param log Log a logging class to use for printing.
+ */
 function IntegrationPipeline( airtable, mailchimp, log ) {
     if ( !(this instanceof IntegrationPipeline)) { return new IntegrationPipeline( airtable, mailchimp ); }
     var self = this;
@@ -16,6 +29,7 @@ function IntegrationPipeline( airtable, mailchimp, log ) {
 
 }
 
+
 /**
  * Given a paired list of airtable records and mailchimp search results,
  *
@@ -25,7 +39,13 @@ function IntegrationPipeline( airtable, mailchimp, log ) {
  * whether the Mailchimp or Airtable version of a record is the more recent
  * subscriber information.
  *
- * This means unsubscribes coming from the Mailchimp List is
+ * This means unsubscribes coming from the Mailchimp List is handled by a
+ * Zapier integration which listens for the unsubscribe event, and updates the corresponding
+ * record (any records corresponding the mailchimp email and names) in Airtable.
+ *
+ * @param list Array<AirtableRecord> A list of airtable records for processing.
+ * @param next a continuation to pass control to.
+ *             follows node style (err, next) => Ø pattern.
  */
 IntegrationPipeline.prototype.selectAction = function( list, next = function() {}) {
 
@@ -61,10 +81,15 @@ IntegrationPipeline.prototype.selectAction = function( list, next = function() {
 };
 
 /**
- * this routine pairs up the airtable change-set with the associated
- * Mailchimp search results for the given airtable record.
+ * This routine pairs up the airtable change-set with the associated
+ * Mailchimp search results for the given airtable record. It does this
+ * by searching for Mailchimp Record exact matches to given email addresses.
  *
- * @param continuation
+ * NOTE: These queries a batched, for volume. This means this request can
+ * take a little while.
+ *
+ * @param next a continuation to pass control to.
+ *             follows node style (err, next) => Ø pattern.
  */
 IntegrationPipeline.prototype.pairRecords = function( next = function() {} ) {
 
@@ -89,12 +114,25 @@ IntegrationPipeline.prototype.pairRecords = function( next = function() {} ) {
 };
 
 
-
+/**
+ * We keep our lists in synch by using a differential strategy. We track the Email and
+ * Mailing List Status fields in at time t and t-1. When the states at time t and t-1
+ * do not match, we consider that some change has happened in airtable, and we post
+ * an update to Mailchimp.
+ *
+ * After that, we know the records are in sync, so we need to set email( t + 1 ) = email( t ),
+ * and in-list( t + 1 ) = in-list( t ), so that these records are removed from our
+ * set of batch candidates.
+ *
+ * @param pairs Array<(AirtableRecord, Mailchimp Search Result)> the pairs to update in Airtable.
+ * @param next a continuation to pass control to.
+ *             follows node style (err, next) => Ø pattern.
+ */
 IntegrationPipeline.prototype.synchronizeRecords = function( pairs, next = function() {} ) {
 
     var integration = this;
 
-    integration.airtable.synchronizeRecords( pairs );
+    integration.airtable.synchronizeRecords( pairs, next );
 
 };
 
