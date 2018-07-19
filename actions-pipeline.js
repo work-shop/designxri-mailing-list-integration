@@ -97,17 +97,27 @@ IntegrationPipeline.prototype.pairRecords = function( next = function() {} ) {
 
     integration.airtable.getChangeSet( function( err, set ) {
 
-        integration.log.airtable('Retreived a set of ' + set.length + ' record(s).', 1 );
 
-        integration.log.mailchimp('Preparing ' + set.length + ' batch(es).', 1 );
+        if ( set.length === 0 ) {
 
-        integration.mailchimp.getMatchingSubscribers( set, function( err, list ) {
+            integration.log.airtable('Retreived an empty changeset.', 1 );
+            integration.log.integration('Nothing to do.', 1 );
+            next( null, [] );
 
-            integration.log.mailchimp('Searched for ' + list.length + ' record(s) by email address.', 1 );
+        } else {
 
-            next( err, list );
+            integration.log.airtable('Retreived a set of ' + set.length + ' record(s).', 1 );
+            integration.log.mailchimp('Preparing ' + set.length + ' batch(es).', 1 );
 
-        });
+            integration.mailchimp.getMatchingSubscribers( set, function( err, list ) {
+
+                integration.log.mailchimp('Searched for ' + list.length + ' record(s) by email address.', 1 );
+
+                next( err, list );
+
+            });
+
+        }
 
     });
 
@@ -135,6 +145,46 @@ IntegrationPipeline.prototype.synchronizeRecords = function( pairs, next = funct
     integration.airtable.synchronizeRecords( pairs, next );
 
 };
+
+
+/**
+ * Run the integration. This routine gets a change set from Airtable,
+ * Matches it with a set of records in Mailchimp, adds or updates
+ * subscribers in the list as needed, and then updates the Airtable records,
+ * removing them from the change log.
+ *
+ * @param next a continuation to pass control to.
+ *             follows node style (err, next) => Ø pattern.
+ *
+ */
+IntegrationPipeline.prototype.run = function( next = function() {} ) {
+
+    var integration = this;
+
+    integration.pairRecords( function( err, results ) {
+
+        if ( err ) { next( err ); }
+
+        if ( results.length === 0 ) {
+
+            next( null, [] );
+
+        } else {
+
+            integration.selectAction( results, function( err, results ) {
+
+                if ( err ) { next( err ); }
+
+                integration.synchronizeRecords( results );
+
+            });
+
+        }
+
+    });
+
+};
+
 
 
 module.exports = IntegrationPipeline;

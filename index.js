@@ -2,7 +2,6 @@
 
 
 var env = require('./.env.json');
-//var config = require('./package.json');
 
 var AirtableIntegration = require('./actions-airtable.js');
 var MailchimpIntegration = require('./actions-mailchimp.js');
@@ -14,16 +13,10 @@ var mailchimp = new MailchimpIntegration( env.mailchimp.endpoint, env.mailchimp.
 var log = new Log( 4 );
 var pipeline = new IntegrationPipeline( airtable, mailchimp, log );
 
-pipeline.pairRecords( function( err, results ) {
+pipeline.run( function( err, results ) {
 
-    if ( err ) { console.error( err ); }
+    if ( err ) { log.error( err.message, 0 ); }
 
-    pipeline.selectAction( results, function( err, results ) {
+    log.integration('Done.', 1);
 
-        if ( err ) { console.error( err ); }
-
-        pipeline.synchronizeRecords( results );
-
-    });
-
-});
+})
