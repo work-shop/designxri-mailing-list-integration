@@ -24,4 +24,27 @@ Scheduler.prototype.every = function( minutes, action ) {
 
 }
 
+/**
+ * This routine sequences a job over a number of seconds. Given a timeout of k minutes, this routine
+ * runs a specified action which lasts a variable number of seconds l(t), every k + l(t) seconds.
+ * In other words, this routine sequences a number of actions, without allowing operations to
+ * overlap
+ *
+ * @param minutes int an inteval of minutes to run this job on.
+ * @param action a function representing the action to run on the specified interval.
+ */
+Scheduler.prototype.linearSequence = function( minutes, action ) {
+
+    var self = this;
+
+    setTimeout( function() {
+
+        action( function() { self.linearSequence( minutes, action ); });
+
+    }, minutes * 60000 );
+
+    return this;
+
+};
+
 module.exports = Scheduler;
