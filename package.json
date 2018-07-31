@@ -4,7 +4,8 @@
   "description": "A small tool for synchonizing Airtable Record Sets with a Mailchimp list.",
   "main": "./index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "LOG_LEVEL=4 node index.js"
   },
   "repository": {
     "type": "git",
@@ -37,12 +38,15 @@
     "request-promise": "^4.2.2"
   },
   "view": "Managed View: Mailing List",
+  "interval": 2,
   "fields": {
     "first_name": "First Name",
     "last_name": "Last Name",
     "previous_email": "Managed Field: Previous Email Address",
     "in_mailing_list": "Active in Mailing Lists",
     "email": "Email",
-    "previous_in_mailing_list": "Managed Field: Previous Active In Mailing Lists"
+    "previous_in_mailing_list": "Managed Field: Previous Active In Mailing Lists",
+    "previous_first_name": "Managed Field: First Name",
+    "previous_last_name": "Managed Field: Last Name"
   }
 }
