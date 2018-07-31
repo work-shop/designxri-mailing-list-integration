@@ -14,7 +14,7 @@ var log = new Log( 4 );
 var pipeline = new IntegrationPipeline( airtable, mailchimp, log );
 var scheduler = new Scheduler();
 
-scheduler.every( 2, function() {
+scheduler.linearSequence( 2, function( done ) {
 
     log.integration('Started.', 1);
 
@@ -24,6 +24,8 @@ scheduler.every( 2, function() {
 
         log.integration('Finished.', 1);
 
-    })
+        done();
 
-})
+    });
+
+});
