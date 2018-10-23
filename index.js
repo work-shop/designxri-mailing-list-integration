@@ -18,7 +18,7 @@ var mailchimp = new MailchimpIntegration( env.mailchimp.endpoint, env.mailchimp.
 var pipeline = new IntegrationPipeline( airtable, mailchimp, log );
 var scheduler = new Scheduler();
 
-//scheduler.linearSequence( pkg.interval, function( done ) {
+scheduler.linearSequence( pkg.interval, function( done ) {
 
     log.integration('Started.', 1);
 
@@ -32,4 +32,4 @@ var scheduler = new Scheduler();
 
     });
 
-//});
+});
