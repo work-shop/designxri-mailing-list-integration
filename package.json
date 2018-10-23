@@ -38,7 +38,7 @@
     "request-promise": "^4.2.2"
   },
   "view": "Managed View: Mailing List",
-  "interval": 2,
+  "interval": 10,
   "fields": {
     "first_name": "First Name",
     "last_name": "Last Name",
