@@ -11,13 +11,15 @@ var md5 = require('md5');
  * @param endpoint string the mailchimp API endpoint to connect to.
  * @param listID string the ID of the list to manage in mailchimp.
  * @param key the API key to use when connecting to mailchimp.
+ * @param pkg JSON package.json configuration
  */
-function MailchimpIntegration( endpoint, listID, key ) {
-    if ( !(this instanceof MailchimpIntegration) ) { return new MailchimpIntegration( endpoint, listID, key ); }
+function MailchimpIntegration( endpoint, listID, key, pkg ) {
+    if ( !(this instanceof MailchimpIntegration) ) { return new MailchimpIntegration( endpoint, listID, key, pkg ); }
     var self = this;
 
     self.mailchimp = new Mailchimp( key );
     self.list = listID;
+    self.config = pkg;
 
 }
 

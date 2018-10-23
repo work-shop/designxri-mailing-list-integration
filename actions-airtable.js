@@ -9,9 +9,10 @@ var Airtable = require('airtable');
  * @param endpoint the URL to make API queries against.
  * @param baseID the hash of the base to use in airtable.
  * @param key the API key for accessing the API.
+ * @param pkg JSON package.json configuration
  */
-function AirtableIntegration( endpoint, baseId, key ) {
-    if ( !(this instanceof AirtableIntegration) ) { return new AirtableIntegration( endpoint, baseId, key ); }
+function AirtableIntegration( endpoint, baseId, key, pkg ) {
+    if ( !(this instanceof AirtableIntegration) ) { return new AirtableIntegration( endpoint, baseId, key, pkg ); }
     var self = this;
 
     Airtable.configure({
@@ -20,6 +21,8 @@ function AirtableIntegration( endpoint, baseId, key ) {
     })
 
     self.base = Airtable.base( baseId );
+
+    self.config = pkg;
 
 }
 
@@ -36,7 +39,9 @@ function AirtableIntegration( endpoint, baseId, key ) {
  */
 AirtableIntegration.prototype.isActiveInList = function( pair ) {
 
-    return pair.record.get('Active in Mailing Lists');
+    var self = this;
+
+    return pair.record.get( self.config.fields.in_mailing_list );
 
 }
 
@@ -60,17 +65,8 @@ AirtableIntegration.prototype.getChangeSet = function( next = function() {} ) {
 
     self.base( 'Individuals' )
         .select({
-            fields: [
-                'First Name',
-                'Last Name',
-                'Email',
-                'Active in Mailing Lists',
-                'Managed Field: Previous Email Address',
-                'Managed Field: Previous Active In Mailing Lists',
-                'Managed Field: Up To Date'
-            ],
-            view: 'Managed View: Mailing List',
-            // filterByFormula: 'OR(NOT({Managed Field: Previous Email Address} = Email), NOT({Managed Field: Previous Active In Mailing Lists} = {Active in Mailing Lists}))'
+            fields: Object.values( self.config.fields ),
+            view: 'Managed View: Mailing List'
         })
         .eachPage( processPage, finishedPages );
 
@@ -91,11 +87,15 @@ AirtableIntegration.prototype.synchronizeRecords = function( records, next = fun
 
     async.each( records, function( pair, callback ) {
 
+        const changeset = {};
+
+        changeset[ self.config.fields.previous_email ] = pair.record.get(self.config.fields.email);
+        changeset[ self.config.fields.previous_in_mailing_list ] = pair.record.get(self.config.fields.in_mailing_list) || false;
+        changeset[ self.config.fields.previous_first_name ] = pair.record.get(self.config.fields.first_name);
+        changeset[ self.config.fields.previous_last_name ] = pair.record.get(self.config.fields.last_name);
+
         self.base( 'Individuals' )
-            .update( pair.record.id, {
-                'Managed Field: Previous Email Address': pair.record.get('Email'),
-                'Managed Field: Previous Active In Mailing Lists': pair.record.get('Active in Mailing Lists') || false
-            }, callback );
+            .update( pair.record.id, changeset, callback );
 
     }, next );
 

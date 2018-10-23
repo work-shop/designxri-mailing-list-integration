@@ -46,7 +46,7 @@
     "in_mailing_list": "Active in Mailing Lists",
     "email": "Email",
     "previous_in_mailing_list": "Managed Field: Previous Active In Mailing Lists",
-    "previous_first_name": "Managed Field: First Name",
-    "previous_last_name": "Managed Field: Last Name"
+    "previous_first_name": "Managed Field: Previous First Name",
+    "previous_last_name": "Managed Field: Previous Last Name"
   }
 }

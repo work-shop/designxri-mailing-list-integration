@@ -13,12 +13,12 @@ const log_level = process.env.LOG_LEVEL || 1;
 
 
 var log = new Log( log_level );
-var airtable = new AirtableIntegration( env.airtable.endpoint, env.airtable.base, env.airtable.key );
-var mailchimp = new MailchimpIntegration( env.mailchimp.endpoint, env.mailchimp.list, env.mailchimp.key );
+var airtable = new AirtableIntegration( env.airtable.endpoint, env.airtable.base, env.airtable.key, pkg );
+var mailchimp = new MailchimpIntegration( env.mailchimp.endpoint, env.mailchimp.list, env.mailchimp.key, pkg );
 var pipeline = new IntegrationPipeline( airtable, mailchimp, log );
 var scheduler = new Scheduler();
 
-scheduler.linearSequence( pkg.interval, function( done ) {
+//scheduler.linearSequence( pkg.interval, function( done ) {
 
     log.integration('Started.', 1);
 
@@ -28,8 +28,8 @@ scheduler.linearSequence( pkg.interval, function( done ) {
 
         log.integration('Finished.', 1);
 
-        done();
+        //done();
 
     });
 
-});
+//});
