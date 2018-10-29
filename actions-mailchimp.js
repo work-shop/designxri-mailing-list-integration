@@ -49,7 +49,7 @@ MailchimpIntegration.prototype.getMatchingSubscribers = function( records, next 
 
     var calls = records.map( function( record ) {
 
-        var prev = record.get('Managed Field: Previous Email Address') || record.get('Email');
+        var prev = record.get( self.config.fields.previous_email ) || record.get( self.config.fields.email );
 
         return {
             method: 'get',

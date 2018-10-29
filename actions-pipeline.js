@@ -175,7 +175,7 @@ IntegrationPipeline.prototype.run = function( next = function() {} ) {
 
                 if ( err ) { next( err ); }
 
-                integration.synchronizeRecords( results );
+                integration.synchronizeRecords( results, next );
 
             });
 

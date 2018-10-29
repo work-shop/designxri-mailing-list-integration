@@ -9,7 +9,7 @@ var IntegrationPipeline = require('./actions-pipeline.js');
 var Log = require('./actions-log.js');
 var Scheduler = require('./actions-schedule.js');
 
-const log_level = process.env.LOG_LEVEL || 1;
+const log_level = process.env.LOG_LEVEL || 2;
 
 
 var log = new Log( log_level );
@@ -17,6 +17,8 @@ var airtable = new AirtableIntegration( env.airtable.endpoint, env.airtable.base
 var mailchimp = new MailchimpIntegration( env.mailchimp.endpoint, env.mailchimp.list, env.mailchimp.key, pkg );
 var pipeline = new IntegrationPipeline( airtable, mailchimp, log );
 var scheduler = new Scheduler();
+
+log.integration('Starting poll.', 1);
 
 scheduler.linearSequence( pkg.interval, function( done ) {
 
@@ -26,9 +28,9 @@ scheduler.linearSequence( pkg.interval, function( done ) {
 
         if ( err ) { log.error( err.message, 0 ); }
 
-        log.integration('Finished.', 1);
+        log.integration('Finished, waiting for ' + pkg.interval + ' minute(s).' , 1);
 
-        //done();
+        done();
 
     });
 
