@@ -1,6 +1,6 @@
 {
     "apps":[{
-        "name": "cron.workshop.co",
+        "name": "airtabletomailchimp.designxri.org",
         "script": "./index.js",
         "autorestart": true,
         "env": {
