@@ -9,8 +9,7 @@ var IntegrationPipeline = require('./actions-pipeline.js');
 var Log = require('./actions-log.js');
 var Scheduler = require('./actions-schedule.js');
 
-const log_level = process.env.LOG_LEVEL || 2;
-
+const log_level = process.env.LOG_LEVEL || 5;
 
 var log = new Log( log_level );
 var airtable = new AirtableIntegration( env.airtable.endpoint, env.airtable.base, env.airtable.key, pkg );
