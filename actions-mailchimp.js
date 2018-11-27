@@ -111,13 +111,13 @@ MailchimpIntegration.prototype.updateSubscriberSet = function( records, next = f
             members: new_members.map( function( r ) {
 
                 return {
-                    email_address: r.record.get('Email'),
+                    email_address: r.record.get( self.config.fields.email ),
                     email_type: 'html',
                     status: ( r.subscribed ) ? 'subscribed' : 'unsubscribed',
                     merge_fields: {
-                        EMAIL: r.record.get('Email'),
-                        FNAME: r.record.get('First Name'),
-                        LNAME: r.record.get('Last Name')
+                        EMAIL: r.record.get( self.config.fields.email ),
+                        FNAME: r.record.get( self.config.fields.first_name ),
+                        LNAME: r.record.get( self.config.fields.last_name )
                     }
                 };
 
@@ -137,9 +137,9 @@ MailchimpIntegration.prototype.updateSubscriberSet = function( records, next = f
                 email_address: r.record.get('Email'),
                 status: ( r.subscribed ) ? 'subscribed' : 'unsubscribed',
                 merge_fields: {
-                    EMAIL: r.record.get('Email'),
-                    FNAME: r.record.get('First Name'),
-                    LNAME: r.record.get('Last Name')
+                    EMAIL: r.record.get( self.config.fields.email ),
+                    FNAME: r.record.get( self.config.fields.first_name ),
+                    LNAME: r.record.get( self.config.fields.last_name )
                 }
             }
         };
