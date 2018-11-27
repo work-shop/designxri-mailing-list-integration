@@ -1,5 +1,6 @@
 'use strict';
 
+var objectvalues = require('objectvalues');
 var async = require('async');
 var Airtable = require('airtable');
 
@@ -65,7 +66,7 @@ AirtableIntegration.prototype.getChangeSet = function( next = function() {} ) {
 
     self.base( 'Individuals' )
         .select({
-            fields: Object.values( self.config.fields ),
+            fields: objectvalues.values( self.config.fields ),
             view: 'Managed View: Mailing List'
         })
         .eachPage( processPage, finishedPages );
